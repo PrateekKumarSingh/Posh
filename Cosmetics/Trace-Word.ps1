@@ -10,6 +10,7 @@ Function Trace-Word
     
     Begin
     {
+        
         $Color = @{       
                     0='Yellow'      
                     1='Magenta'     
@@ -48,18 +49,45 @@ Function Trace-Word
     Process
     {
     $content | ForEach-Object {
-                    
+    
+        $TotalLength = 0
+               
         $_.split() | `
         where{-not [string]::IsNullOrWhiteSpace($_)} | ` #Filter-out whiteSpaces
         ForEach-Object{
-                        $Token =  $_       
-                        If($Token -in $words){
-                            Write-Host "$Token" -NoNewline -Fore Black -Back $ColorLookup[$Token];
-                            Write-Host " " -NoNewline
+                        if($TotalLength -lt ($Host.ui.RawUI.BufferSize.Width-10))
+                        {
+                            #"TotalLength : $TotalLength"
+                            $Token =  $_
+                            
+                            Foreach($Word in $Words)
+                            {
+                                if($Token -like "*$Word*")
+                                {
+                                    $Before, $after = $Token -Split "$Word"
+                                        
+                                    "[$Before][$Word][$After]`n"
+                                    
+                                    Write-Host $Before -NoNewline ; 
+                                    Write-Host $Word -NoNewline -Fore Black -Back $ColorLookup[$Word];
+                                    Write-Host $after -NoNewline ;                                    
+                                    Start-Sleep -Seconds 1    
+                                    break  
+                         
+                                }
+                            }    
+                            Write-Host "$Token " -NoNewline                                    
+                            $TotalLength = $TotalLength + $Token.Length  + 1
                         }
-                        else{
-                            Write-Host "$Token " -NoNewline
+                        else
+                        {                      
+                            Write-Host '' #New Line  
+                            $TotalLength = 0 
+
                         }
+
+                            #Start-Sleep -Seconds 0.5
+                        
         }
         Write-Host '' #New Line               
     }
@@ -69,4 +97,8 @@ Function Trace-Word
 
 }
 
-#gc .\log.txt | Trace-Word -words "random","more","on",'of','end','logging','is','a','test','log','some','information','this','file','and','goes'
+gc C:\Temp\doc.txt | Trace-Word -words "trump","hillary","FBI","Emails"
+
+gc .\log.txt |Trace-Word -words "IIS", "exe", "10", 'system'
+
+gc .\log.txt | Trace-Word -words "random","more","on",'of','end','logging','is','a','test','log','some','information','this','file','and','goes'
