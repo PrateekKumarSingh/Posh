@@ -1,0 +1,20 @@
+[09/03/2016 01:46:09] [ ***** IIS 10.0 Component Based Setup ***** ]
+[09/03/2016 01:46:09] Sysprep specialize phase started
+[09/03/2016 01:46:09] NetFrameworkConfigurationKey key container already exists
+[09/03/2016 01:46:09] Set ACLs on NetFrameworkConfigurationKey
+[09/03/2016 01:46:09] iisWasKey key container already exists
+[09/03/2016 01:46:09] iisWasKey user key already exists
+[09/03/2016 01:46:09] iisConfigurationKey already exists
+[09/03/2016 01:46:09] iisConfigurationKey already exists
+
+[09/03/2016 01:46:10] Wrote CNG Provider Entry into the redirection config file
+[09/03/2016 01:46:10] SysPrepBackup not called, so not doing SysPrepRestore. 
+[09/03/2016 01:46:11] Sysprep specialize phase ended
+[09/03/2016 01:46:11] [ End of IIS 10.0 Component Based Setup ]
+[09/03/2016 01:46:15] [ ***** IIS 10.0 Component Based Setup ***** ]
+[09/03/2016 01:46:15] "C:\WINDOWS\System32\inetsrv\iissetup.exe" /launch C:\WINDOWS\System32\inetsrv\appcmd.exe rese
+t config -section:system.applicationHost/applicationPools
+[09/03/2016 01:46:15] Launching command C:\WINDOWS\System32\inetsrv\appcmd.exe, with params C:\WINDOWS\System32\inet
+srv\appcmd.exe reset config -section:system.applicationHost/applicationPools
+[09/03/2016 01:46:16] LaunchCommand Succeeded
+[09/03/2016 01:46:16] Success!
