@@ -59,24 +59,34 @@ Function Trace-Word
                         {
                             #"TotalLength : $TotalLength"
                             $Token =  $_
+                            $displayed= $False
                             
                             Foreach($Word in $Words)
                             {
                                 if($Token -like "*$Word*")
                                 {
                                     $Before, $after = $Token -Split "$Word"
+                              
                                         
-                                    "[$Before][$Word][$After]`n"
+                                    #"[$Before][$Word][$After]{$Token}`n"
                                     
                                     Write-Host $Before -NoNewline ; 
                                     Write-Host $Word -NoNewline -Fore Black -Back $ColorLookup[$Word];
-                                    Write-Host $after -NoNewline ;                                    
-                                    Start-Sleep -Seconds 1    
-                                    break  
-                         
+                                    Write-Host $after -NoNewline ; 
+                                    $displayed = $true                                   
+                                    #Start-Sleep -Seconds 1    
+                                    #break  
                                 }
-                            }    
-                            Write-Host "$Token " -NoNewline                                    
+
+                            } 
+                            If(-not $displayed)
+                            {   
+                                Write-Host "$Token " -NoNewline                                    
+                            }
+                            else
+                            {
+                                Write-Host " " -NoNewline  
+                            }
                             $TotalLength = $TotalLength + $Token.Length  + 1
                         }
                         else
@@ -97,8 +107,6 @@ Function Trace-Word
 
 }
 
-gc C:\Temp\doc.txt | Trace-Word -words "trump","hillary","FBI","Emails"
+#gc C:\Temp\doc.txt | Trace-Word -words "trump","hillary","FBI","Emails"
 
 gc .\log.txt |Trace-Word -words "IIS", "exe", "10", 'system'
-
-gc .\log.txt | Trace-Word -words "random","more","on",'of','end','logging','is','a','test','log','some','information','this','file','and','goes'
