@@ -26,12 +26,14 @@ Function Expand-Alias
     Process{
                 ForEach($P in $Path)
                 {
+                    $P = Convert-Path -Path $P
                     $Reader = [system.io.file]::OpenText($P)
 
                     $RequiredFixes = Invoke-ScriptAnalyzer -Path $P | `
                     Where-Object {$_.RuleName -eq "PSAvoidUsingCmdletAliases"} | `
                     Select-Object @{n='Target';e={$_.extent}}, `
-                    @{n='Correction';e={$_.SuggestedCorrections.text}}
+                    @{n='Correction';e={$_.SuggestedCorrections.text}}, `
+                    @{n='StartLineNumber';e={$_.SuggestedCorrections.StartLinenumber}}
 
                     $i = 1
                     $Result = @()
@@ -58,7 +60,7 @@ Function Expand-Alias
 
                     If($UpdateFile)
                     {
-                        $Result | Out-File "$(Convert-path $P)" -Force -Verbose
+                        $Result | Out-File $P -Force -Verbose
                     }
                     $Result
                 }
