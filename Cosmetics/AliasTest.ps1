@@ -8,5 +8,6 @@
         "$Token - $ResolvedCommand"
     }
 
-    gci;gci;ls;ls;ls;wmio
+    gci;gci;ls;ls;ls;gwmi;ls
  }
+ 
