@@ -9,12 +9,17 @@ Function Expand-Alias
                 Position=0
                 )
             ]
-            [ValidateScript({Test-Path $_ -PathType 'leaf'})]  
+            #[ValidateScript({Test-Path $_ -PathType 'leaf'})]  
             [string] $Path,
             [Switch] $UpdateFile
     )
 
-    Begin{}
+    Begin{
+            If(-not (Import-Module -Name PSScriptAnalyzer -PassThru -ErrorAction SilentlyContinue -NoClobber))
+            {
+                Install-Module PSScriptAnalyzer -Scope CurrentUser -Force -Verbose
+            }
+    }
     Process{
                 ForEach($P in $Path)
                 {
@@ -39,10 +44,9 @@ Function Expand-Alias
                         {
                             $Item = $RequiredFixes|Where-Object {$_.StartLinenumber -eq $i}
                             #To escape Replace the special char in
-                            Foreach($CurrentItem in $Item.Target.Text |Select-Object -Unique)
+                            Foreach($CurrentItem in $Item|Select-Object target, correction -Unique)
                             {
-                                $ToReplace = [Regex]::Escape("$($Line.substring($Line.IndexOf($CurrentItem),$CurrentItem.length))")
-                                $Line = $Line -replace $ToReplace , $CurrentItem.Correction 
+                                $Line = $Line -replace [Regex]::Escape($CurrentItem.target.text) , $CurrentItem.Correction 
                             }                        
                             $Result =  $Result + $Line
                         }
