@@ -14,10 +14,13 @@ Function Expand-Alias
             [Switch] $UpdateFile
     )
 
-    Begin{
-            If(-not (Import-Module -Name PSScriptAnalyzer -PassThru -ErrorAction SilentlyContinue -NoClobber))
+    Begin{    
+            If(-not (Get-Module -Name 'PSScriptAnalyzer'))
             {
-                Install-Module PSScriptAnalyzer -Scope CurrentUser -Force -Verbose
+                If(-not (Import-Module PSScriptAnalyzer -Verbose -ErrorAction SilentlyContinue -PassThru))
+                {
+                    Install-Module PSScriptAnalyzer -Scope CurrentUser -Force -Verbose -ErrorAction SilentlyContinue
+                }
             }
     }
     Process{
@@ -28,23 +31,17 @@ Function Expand-Alias
                     $RequiredFixes = Invoke-ScriptAnalyzer -Path $P | `
                     Where-Object {$_.RuleName -eq "PSAvoidUsingCmdletAliases"} | `
                     Select-Object @{n='Target';e={$_.extent}}, `
-                    @{n='Correction';e={$_.SuggestedCorrections.text}}, `
-                    @{n='StartIndex';e={$_.SuggestedCorrections.StartColumnNumber -1 }}, `
-                    @{n='EndIndex';e={$_.SuggestedCorrections.EndColumnNumber - 1}}, `
-                    @{n='StartLineNumber';e={$_.SuggestedCorrections.StartLinenumber}}, `
-                    @{n='EndLineNumber';e={$_.SuggestedCorrections.EndlineNumber}}
+                    @{n='Correction';e={$_.SuggestedCorrections.text}}
 
                     $i = 1
                     $Result = @()
                     While($Reader.Peek() -gt 0)
                     {
-                        #$i
                         $Line = $Reader.ReadLine()
                         If($i -in $RequiredFixes.StartLineNumber)
                         {
                             $Item = $RequiredFixes|Where-Object {$_.StartLinenumber -eq $i}
-                            #To escape Replace the special char in
-                            Foreach($CurrentItem in $Item|Select-Object target, correction -Unique)
+                            Foreach($CurrentItem in $Item | Select-Object target, correction -Unique)
                             {
                                 $Line = $Line -replace [Regex]::Escape($CurrentItem.target.text) , $CurrentItem.Correction 
                             }                        
@@ -56,15 +53,15 @@ Function Expand-Alias
                         }
                         $i=$i+1
                     }
+                    # Close the reader to release the Handle on file before updating it
                     $Reader.Close()
+
                     If($UpdateFile)
                     {
                         $Result | Out-File "$(Convert-path $P)" -Force -Verbose
                     }
                     $Result
-
                 }
-                    #$Path | Trace-Word -words $RequiredFixes.target.text
     }
     End{}
 
