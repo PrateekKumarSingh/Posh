@@ -2,7 +2,7 @@
  %{
     $token = $_.content
 
-    $ResolvedCommand = (Get-Alias |?{$_.Name -eq $token}).resolvedcommand.Name
+    $ResolvedCommand = (Get-Alias |Where-Object{$_.Name -eq $token}).resolvedcommand.Name
     if(-not [string]::IsNullOrEmpty($ResolvedCommand))
     {
         "$Token - $ResolvedCommand"

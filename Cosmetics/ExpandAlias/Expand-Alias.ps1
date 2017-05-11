@@ -39,12 +39,14 @@ Function Expand-Alias
                     $Result = @()
                     While($Reader.Peek() -gt 0)
                     {
-                        $Line = $Reader.ReadLine()
+                        $Line = $Reader.ReadLine()#;$Line
                         If($i -in $RequiredFixes.StartLineNumber)
                         {
                             $Item = $RequiredFixes|Where-Object {$_.StartLinenumber -eq $i}
                             Foreach($CurrentItem in $Item | Select-Object target, correction -Unique)
                             {
+                               Trace-Word -content " $($Line.replace($CurrentItem.target.text, "$($CurrentItem.target.text) $($CurrentItem.Correction)")) " `
+                                          -words $currentItem.Target.Text, $currentItem.Correction
                                 $Line = $Line -replace [Regex]::Escape($CurrentItem.target.text) , $CurrentItem.Correction 
                             }                        
                             $Result =  $Result + $Line
@@ -62,11 +64,12 @@ Function Expand-Alias
                     {
                         $Result | Out-File $P -Force -Verbose
                     }
-                    $Result
+                    #$Result
                 }
     }
     End{}
 
 }
 
+Expand-Alias -Path .\TestFile1.ps1
 # ls | ForEach-Object {Invoke-ScriptAnalyzer -Path $_.FullName} |group Rulename |sort -Descending count
