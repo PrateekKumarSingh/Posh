@@ -2,6 +2,7 @@ Function Get-SCCMCollectionMembershipRule
 {
 [cmdletbinding()]
 param(
+        # Enter the CollectionName code like DHB , EQT etc
         [Parameter(Mandatory=$true)]
         [String]
         $CollectionName
@@ -12,9 +13,9 @@ $ScriptBlock = [Scriptblock]{
     Write-Verbose "ConfigurationManager v$($Module.Version) found. Proceeding."
     Set-Location "$((Get-PSDrive -PSProvider CMSite).name):\"
     Write-Verbose "Filtering SCCM Device collections and Membership Rules by *$CollectionName*"
-    $MemberShipRule  = (Get-CMDeviceCollection -name "*$CollectionName*").Where({$_.CollectionRules.RuleName -ne $null}).Foreach({
-                Get-CMDeviceCollectionQueryMembershipRule -CollectionID $_.CollectionID
-            })
+    $MemberShipRule  =  Get-CMDeviceCollection -name "*$CollectionName*"|`
+                        Where {$_.CollectionRules.RuleName -ne $null} |`
+                        Foreach {Get-CMDeviceCollectionQueryMembershipRule -CollectionID $_.CollectionID }
 
     If($MemberShipRule)
     {
