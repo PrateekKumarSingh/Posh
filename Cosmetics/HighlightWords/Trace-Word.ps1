@@ -3,110 +3,85 @@ Function Trace-Word
     [Cmdletbinding()]
     [Alias("Highlight")]
     Param(
-            [Parameter(ValueFromPipeline=$true)] [string[]] $content,
-            [String[]]$words = $(throw "Provide word[s] to be highlighted!"),
-            [Switch] $MatchCase
+        [Parameter(ValueFromPipeline = $true, Position = 0)] [string[]] $content,
+        [Parameter(Position = 1)] 
+        [ValidateNotNull()]
+        [String[]] $words = $(throw "Provide word[s] to be highlighted!")
     )
     
     Begin
-    {
+    {        
+        # preparing a color lookup table
         
-        $Color = @{       
-                    0='Yellow'      
-                    1='Magenta'     
-                    2='Red'         
-                    3='Cyan'        
-                    4='Green'       
-                    5 ='Blue'        
-                    6 ='DarkGray'    
-                    7 ='Gray'        
-                    8 ='DarkYellow'    
-                    9 ='DarkMagenta'    
-                    10='DarkRed'     
-                    11='DarkCyan'    
-                    12='DarkGreen'    
-                    13='DarkBlue'        
-        }
+        $Color = [enum]::GetNames([System.ConsoleColor]) | Where-Object {$_ -notin @('White', 'Black')} 
+        [array]::Reverse($Color) # personal preference to color with lighter/dull shades at the end
 
-        $ColorLookup =@{}
-
-        For($i=0;$i -lt $words.count ;$i++)
+        $Counter = 0
+        $ColorLookup = [ordered]@{}
+        foreach ($item in $words)
         {
-            if($i -eq 13)
+            $ColorLookup.Add($item, $Color[$Counter])
+            $Counter ++
+            if ($Counter -gt ($Color.Count - 1))
             {
-                $j =0
+                $Counter = 0
             }
-            else
-            {
-                $j = $i
-            }
-
-            $ColorLookup.Add($words[$i],$Color[$j])
-            $j++
         }
-        
+
     }
     Process
     {
-    $content | ForEach-Object {
+        $content | ForEach-Object {
     
-        $TotalLength = 0
+            $TotalLength = 0
                
-        $_.split() | `
-        where{-not [string]::IsNullOrWhiteSpace($_)} | ` #Filter-out whiteSpaces
-        ForEach-Object{
-                        if($TotalLength -lt ($Host.ui.RawUI.BufferSize.Width-10))
-                        {
-                            #"TotalLength : $TotalLength"
-                            $Token =  $_
-                            $displayed= $False
+            $_.split() | 
+                Where-Object {-not [string]::IsNullOrWhiteSpace($_)} |  #Filter-out whiteSpaces
+                ForEach-Object {
+                if ($TotalLength -lt ($Host.ui.RawUI.BufferSize.Width - 10))
+                {
+                    #"TotalLength : $TotalLength"
+                    $Token = $_
+                    $displayed = $False
                             
-                            Foreach($Word in $Words)
-                            {
-                                if($Token -like "*$Word*")
-                                {
-                                    $Before, $after = $Token -Split "$Word"
-                              
-                                        
-                                    #"[$Before][$Word][$After]{$Token}`n"
+                    Foreach ($Word in $Words)
+                    {
+                        if ($Token -like "*$Word*")
+                        {
+                            $Before, $after = $Token -Split "$Word"
                                     
-                                    Write-Host $Before -NoNewline ; 
-                                    Write-Host $Word -NoNewline -Fore Black -Back $ColorLookup[$Word];
-                                    Write-Host $after -NoNewline ; 
-                                    $displayed = $true                                   
-                                    #Start-Sleep -Seconds 1    
-                                    #break  
-                                }
-
-                            } 
-                            If(-not $displayed)
-                            {   
-                                Write-Host "$Token " -NoNewline                                    
-                            }
-                            else
-                            {
-                                Write-Host " " -NoNewline  
-                            }
-                            $TotalLength = $TotalLength + $Token.Length  + 1
-                        }
-                        else
-                        {                      
-                            Write-Host '' #New Line  
-                            $TotalLength = 0 
-
+                            Write-Host $Before -NoNewline ; 
+                            Write-Host $Word -NoNewline -Fore Black -Back $ColorLookup[$Word];
+                            Write-Host $after -NoNewline ; 
+                            $displayed = $true                                   
                         }
 
-                            #Start-Sleep -Seconds 0.5
+                    } 
+                    If (-not $displayed)
+                    {   
+                        Write-Host "$Token " -NoNewline                                    
+                    }
+                    else
+                    {
+                        Write-Host " " -NoNewline  
+                    }
+                    $TotalLength = $TotalLength + $Token.Length + 1
+                }
+                else
+                {                      
+                    Write-Host '' #New Line  
+                    $TotalLength = 0 
+
+                }
                         
+            }
+            Write-Host '' #New Line               
         }
-        Write-Host '' #New Line               
-    }
     }
     end
     {    }
-
 }
 
-#gc C:\Temp\doc.txt | Trace-Word -words "trump","hillary","FBI","Emails"
 
-gc .\log.txt |Trace-Word -words "IIS", "exe", "10", 'system'
+
+#Trace-Word -content (Get-Content iis.log) -words "IIS", "exe", "10", 'system'
